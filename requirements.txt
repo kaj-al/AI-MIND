@@ -1,0 +1,10 @@
+langchain
+langgraph
+langchain-community
+langchain-groq
+chromadb
+sentence-transformers
+fastapi
+uvicorn
+slowapi
+streamlit
