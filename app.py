@@ -1,7 +1,10 @@
-import streamlit as st 
-import requests
 import re
 from datetime import datetime
+
+import requests
+import streamlit as st
+
+from store import store_documents
 
 
 def normalize_value(value):
@@ -45,6 +48,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+
 # Custom CSS for styling
 st.markdown("""
 <style>
@@ -73,6 +77,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
+
 # Header
 col1, col2 = st.columns([0.85, 0.15])
 with col1:
@@ -83,6 +89,26 @@ with col2:
 
 st.divider()
 
+uploaded_files = st.file_uploader(
+    "Upload PDF files",
+    type=["pdf"],
+    accept_multiple_files=True,
+    key="file_uploader",
+)
+
+if uploaded_files:
+    selected_names = [file.name for file in uploaded_files]
+    if st.session_state.get("uploaded_filenames") != selected_names:
+        with st.spinner("Indexing uploaded documents..."):
+            indexed_count = store_documents(uploaded_files)
+        st.session_state.uploaded_filenames = selected_names
+        st.session_state.uploaded_count = indexed_count
+        if indexed_count:
+            st.success(f"Indexed {indexed_count} document pages for analysis.")
+        else:
+            st.warning("No readable content was found in the uploaded file(s).")
+elif st.session_state.get("uploaded_filenames"):
+    st.caption(f"Using {st.session_state.get('uploaded_count', 0)} indexed document pages for analysis.")
 # Sidebar configuration
 with st.sidebar:
     st.header("Configuration")
